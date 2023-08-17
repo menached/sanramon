@@ -41,17 +41,29 @@ while True:
           model="gpt-3.5-turbo",
           messages=[
                 {"role": "system", "content": "You are a helpful budtender who knows all about the cannabis industry."},
-                {"role": "user", "content": f"I have a product named '{product['name']}' with a short description of '{product['short_description']}' and a long description of '{product['description']}'. I need a new but similar name for this product that will both help with SEO and improve the product visibility in search engines.  Dont stray too far from the core idea of the original description. Use the word Doap as an acronmy for awesome."},
+                {"role": "user", "content": f"I have a product named '{product['name']}' with a short description of '{product['short_description']}' and a long description of '{product['description']}'. I need a new but similar name for this product that will both help with SEO and improve the product visibility in search engines.  Dont stray too far from the core idea of the original description. Use the word Doap as an acronmy for awesome. Limit the title to abut 70 characters.  Do not use any punctuation or apostrophes or quotes. Keep it short and simple and best optimized for SEO.  Also generate a new short_description and description that follows what is already in name, short_description, and description but is more concise, optimized for SEO, and unique. Mention landmarks in the San Ramon area in the descriptions.  Especially good meet up spots. "},
             ]
         )
         
         new_product_name = response['choices'][0]['message']['content'].strip()
+        new_short_description = response['choices'][0]['message']['content'].split("\n\n")[1]
+        new_description = response['choices'][0]['message']['content'].split("\n\n")[2]
 
-        replacements = ['<br>', '<br />', '<p>', '</p>', '<h5>', '</h5>', '\n', '"', "'"]
+        print("\nResponse: ", response)
+        print()
+        print("\nNew Product Name: ", new_product_name)
+        print()
+        replacements = ['<br>', '<br />', '<p>', '</p>', '<h5>', '</h5>', '\n', '"', "'", "New Description:", "New Short Description"]
         for rep in replacements:
             product['name'] = product['name'].replace(rep, '')
+            old_product_name = product['name']
+            old_short_description = product['short_description']
+            old_description = product['description']
             product['short_description'] = html.unescape(product['short_description'].replace(rep, ''))
             product['description'] = html.unescape(product['description'].replace(rep, ''))
+            new_product_name = html.unescape(new_product_name.replace(rep, ''))
+            new_short_description = html.unescape(new_short_description.replace(rep, ''))
+            new_description = html.unescape(new_description.replace(rep, ''))
 
         # Adding ' - SALE' from product name
         # product['name'] += ' - SALE'
@@ -60,15 +72,19 @@ while True:
                 f'ID: {product["id"]}  '
                 f'\nSku: {product["sku"]}  '
                 f'\nPermalink: {product["permalink"]}'
-                f'\nCurrent Name: {product["name"]}  '
+                f'\nCurrent Name: {old_product_name}  '
+                f'\nProposed New Name: {new_product_name}  '
                 f'\nCurrent Short Description: {product["short_description"]}  '
+                f'\nProposed Short Description: {new_short_description}  '
                 f'\nCurrent Description: {product["description"]}  '
+                f'\nProposed Description: {new_description}  '
                 f'\n'
                 )
         # Uncomment the next three lines to update products. 
         # update_url = f'{base_url}/{product["id"]}'
         # update_response = requests.put(update_url, json=product, auth=auth)
         # update_response.raise_for_status
+
     page += 1
 
 print("Product found: ", counter)
