@@ -36,16 +36,11 @@ while True:
     if not products:
         break
     for product in products:
-        # Removing ' - SALE' from product name
-        product['name'] = product['name'].replace(' - SALE', '')
-        product['name'] = product['name'].replace('"', '') 
-        product['name'] = product['name'].replace("'", '') 
-        product['short_description'] = html.unescape(product['short_description'])
-        product['description'] = html.unescape(product['description'])
         replacements = ['<br>', '<br />', '<p>', '</p>', '<h5>', '</h5>', '\n', '"', "'"]
         for rep in replacements:
-            product['description'] = product['description'].replace(rep, '')
-            product['short_description'] = product['short_description'].replace(rep, '')
+            product['name'] = product['name'].replace(rep, '')
+            product['short_description'] = html.unescape(product['short_description'].replace(rep, ''))
+            product['description'] = html.unescape(product['description'].replace(rep, ''))
 
         # Adding ' - SALE' from product name
         # product['name'] += ' - SALE'
