@@ -64,7 +64,6 @@ response = openai.ChatCompletion.create(
 ]
 )
 
-# get new_product_name from response here
 new_product_name = response['choices'][0]['message']['content'].strip()
 new_product_name = html.unescape(re.sub('<.*?>', '', new_product_name))
 
@@ -93,8 +92,6 @@ response_short_description = openai.ChatCompletion.create(
 
 new_short_description = response_short_description['choices'][0]['message']['content'].strip()
 new_short_description = html.unescape(re.sub('<.*?>', '', new_short_description))
-# product['short_description'] = new_short_description
-
 
 response_long_description = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
@@ -124,7 +121,6 @@ response_long_description = openai.ChatCompletion.create(
 new_long_description = response_long_description['choices'][0]['message']['content'].strip()
 new_long_description = html.unescape(re.sub('<.*?>', '', new_long_description))
 
-
 old_product_name = product['name']
 product['name'] = new_product_name
 old_short_description = product['short_description']
@@ -132,7 +128,6 @@ product['short_description'] = new_short_description
 
 old_long_description = product['description']
 product['description'] = new_long_description
-
 
 print(
     f"SKU: {sku}\n\n"
