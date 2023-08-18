@@ -10,8 +10,7 @@ import pprint
 if not nltk.data.find('tokenizers/punkt'):
     nltk.download('punkt', quiet=True)
 
-# product_id = 61
-product_id = 54988
+sku = "20700"
 
 credentials = {}
 creds_file_path = os.path.join(
@@ -36,10 +35,14 @@ auth = (
 )
 base_url = "https://sanramon.doap.com/wp-json/wc/v3/products"
 
-response = requests.get(f'{base_url}/{product_id}', auth=auth)
+response = requests.get(f'{base_url}', auth=auth, params={'sku': sku})
 response.raise_for_status()
 
-product = response.json()
+if not response.json():
+    print(f"No product found with SKU: {sku}")
+    exit()
+
+product = response.json()[0]
 
 response = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
@@ -50,7 +53,7 @@ response = openai.ChatCompletion.create(
     },
     {
         "role": "user",
-        "content": f"I have a product named '{product['name']}' with a short description of '{product['short_description']}' and a long description of '{product['description']}'. "
+        "content": f"I have a product with SKU '{sku}' named '{product['name']}' with a short description of '{product['short_description']}' and a long description of '{product['description']}'. "
                    f"I need a new but similar name for this product that will both help with SEO and improve the product visibility in search engines. "
                    f"Don't stray too far from the core idea of the original description. Use the word Doap as an acronym for awesome. "
                    f"Limit the new product name to about 70 characters.  Do not use any punctuation or apostrophes or quotes. "
@@ -65,9 +68,6 @@ response = openai.ChatCompletion.create(
 new_product_name = response['choices'][0]['message']['content'].strip()
 new_product_name = html.unescape(re.sub('<.*?>', '', new_product_name))
 
-# old_product_name = product['name']
-old_product_name = html.unescape(re.sub('<.*?>', '', product['name']))
-
 response_short_description = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages = [
@@ -77,7 +77,7 @@ response_short_description = openai.ChatCompletion.create(
     },
     {
         "role": "user",
-        "content": f"I have a product named '{new_product_name}' with a short description '{product['short_description']}' and description '{product['description']}'. "
+        "content": f"I have a product with SKU '{sku}' named '{new_product_name}' with a short description '{product['short_description']}' and description '{product['description']}'. "
                    f"I need a new but similar short description that will both help with SEO and improve the product visibility in search engines."
                    f"Limit the new short description to about 160 characters."
                    f"Optimize for SEO and make sure it is not detectable by AI detectors. "
@@ -105,7 +105,7 @@ response_long_description = openai.ChatCompletion.create(
     },
     {
         "role": "user",
-        "content": f"I have a product named '{new_product_name}' with a long description ' {product['description']}'. "
+        "content": f"I have a product with SKU '{sku}' named '{new_product_name}' with a long description ' {product['description']}'. "
                    f"I need a new but similar long description that will both help with SEO and improve the product visibility in search engines. "
                    f"The new description should be detailed and captivating to pique the interest of potential customers. "
                    f"Optimize for SEO and make sure it is not detectable by AI detectors."
@@ -125,27 +125,27 @@ new_long_description = response_long_description['choices'][0]['message']['conte
 new_long_description = html.unescape(re.sub('<.*?>', '', new_long_description))
 
 
+old_product_name = product['name']
 product['name'] = new_product_name
-old_short_description = product['short_description'] 
+old_short_description = product['short_description']
 product['short_description'] = new_short_description
 
-old_long_description = product['description'] 
+old_long_description = product['description']
 product['description'] = new_long_description
 
 
 print(
-    f"Product ID {product_id}\n\n"
-    f"Old name:\n {old_product_name}\n"
-    f"Old short_description:\n {old_short_description}\n"
-    f"Old description:\n {old_long_description}\n"
-    f"New name:\n {new_product_name}\n"
-    f"New short_description:\n {new_short_description}\n"
-    f"New description:\n {new_long_description}"
+    f"SKU: {sku}\n\n"
+    f"Old name:\n{product['name']}\n"
+    f"Old short_description:\n{old_short_description}\n"
+    f"Old description:\n{old_long_description}\n"
+    f"New name:\n{new_product_name}\n"
+    f"New short_description:\n{new_short_description}\n"
+    f"New description:\n{new_long_description}"
 )
 
 # Update the product with the new name
-update_url = f'{base_url}/{product_id}'
-
+update_url = f'{base_url}/{product["id"]}'
 
 proceed = input("Do you want to proceed with updating the product? (Yes/No): ")
 proceed = proceed.lower().strip()  # Make sure the response is in lowercase and stripped of any leading/trailing spaces
@@ -155,7 +155,3 @@ if proceed == 'yes':
     update_response.raise_for_status()
 else:
     print("Operation cancelled by the user.")
-
-
-# update_response.raise_for_status()
-
