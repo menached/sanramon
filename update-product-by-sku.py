@@ -1,4 +1,5 @@
 import openai
+import sys
 import html
 import re
 import os
@@ -10,7 +11,7 @@ import pprint
 if not nltk.data.find('tokenizers/punkt'):
     nltk.download('punkt', quiet=True)
 
-sku = "20700"
+sku = sys.argv[1]
 
 credentials = {}
 creds_file_path = os.path.join(
