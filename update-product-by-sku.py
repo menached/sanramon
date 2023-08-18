@@ -136,7 +136,7 @@ product['description'] = new_long_description
 
 print(
     f"SKU: {sku}\n\n"
-    f"Old name:\n{product['name']}\n"
+    f"Old name:\n{old_product_name}\n"
     f"Old short_description:\n{old_short_description}\n"
     f"Old description:\n{old_long_description}\n"
     f"New name:\n{new_product_name}\n"
