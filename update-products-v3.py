@@ -41,7 +41,7 @@ while True:
           model="gpt-3.5-turbo",
           messages=[
                 {"role": "system", "content": "You are a helpful budtender who knows all about the cannabis industry."},
-                {"role": "user", "content": f"I have a product named '{product['name']}' with a short description of '{product['short_description']}' and a long description of '{product['description']}'. I need a new but similar name for this product that will both help with SEO and improve the product visibility in search engines.  Dont stray too far from the core idea of the original description. Use the word Doap as an acronmy for awesome. Limit the title to abut 70 characters.  Do not use any punctuation or apostrophes or quotes. Keep it short and simple and best optimized for SEO.  Also generate a new short_description and description that follows what is already in name, short_description, and description but is more concise, optimized for SEO, and unique. Mention landmarks in the San Ramon area in the descriptions.  Especially good meet up spots. "},
+                {"role": "user", "content": f"I have a product named '{product['name']}' with a short description of '{product['short_description']}' and a long description of '{product['description']}'. I need a new but similar name for this product that will both help with SEO and improve the product visibility in search engines.  Dont stray too far from the core idea of the original description. Use the word Doap as an acronmy for awesome. Limit the new product name to abut 70 characters. Keep the short_description between 50-150 characters. Do not use any punctuation or apostrophes or quotes. Do use proper capitalization. Optimized all for SEO.  Generate the new short_description and description that follows what is already in name, short_description, and description but is more concise, optimized for SEO, unique, and not detectable by AI detectors. Mention landmarks in the San Ramon area in the descriptions when possible.  Especially good meet up spots. Having a hippie kind of vibe is cool. "},
             ]
         )
         
@@ -49,11 +49,9 @@ while True:
         new_short_description = response['choices'][0]['message']['content'].split("\n\n")[1]
         new_description = response['choices'][0]['message']['content'].split("\n\n")[2]
 
-        print("\nResponse: ", response)
-        print()
-        print("\nNew Product Name: ", new_product_name)
-        print()
-        replacements = ['<br>', '<br />', '<p>', '</p>', '<h5>', '</h5>', '\n', '"', "'", "New Description:", "New Short Description"]
+        # print("\nResponse: ", response)
+        #print("\nNew Product Name: ", new_product_name)
+        replacements = ['<br>', '<br />', '<p>', '</p>', '<h5>', '</h5>', '\n', '"', "'", "New Description:", "New Short Description", "Product Name:", "New Name:"]
         for rep in replacements:
             product['name'] = product['name'].replace(rep, '')
             old_product_name = product['name']
@@ -71,13 +69,13 @@ while True:
         print(
                 f'ID: {product["id"]}  '
                 f'\nSku: {product["sku"]}  '
-                f'\nPermalink: {product["permalink"]}'
-                f'\nCurrent Name: {old_product_name}  '
-                f'\nProposed New Name: {new_product_name}  '
-                f'\nCurrent Short Description: {product["short_description"]}  '
-                f'\nProposed Short Description: {new_short_description}  '
-                f'\nCurrent Description: {product["description"]}  '
-                f'\nProposed Description: {new_description}  '
+                f'\nPermalink: {product["permalink"]}  '
+                # f'\n\nCurrent Name: {old_product_name}  '
+                f'\n\nProposed New Name: {new_product_name}  '
+                # f'\n\nCurrent Short Description: {product["short_description"]}  '
+                f'\n\nProposed Short Description: {new_short_description}  '
+                # f'\n\nCurrent Description: {product["description"]}  '
+                f'\n\nProposed Description: {new_description}  '
                 f'\n'
                 )
         # Uncomment the next three lines to update products. 

@@ -52,7 +52,7 @@ while True:
         
         new_product_name = response['choices'][0]['message']['content'].strip()
         
-        product['name'] = new_product_name
+         product['name'] = new_product_name
         print(f'Product ID: {product["id"]}, '
               f'SKU: {product["sku"]}, '
               f'New Name: {product["name"]}, '   # Modified product name will be displayed
