@@ -183,14 +183,16 @@ pprint.pprint (product)
 
 # Update the product with the new name
 update_url = f'{base_url}/{product["id"]}'
+update_response = requests.put(update_url, json=product, auth=auth)
+update_response.raise_for_status()
 
-proceed = input("Do you want to proceed with updating the product? (Yes/No): ")
-proceed = proceed.lower().strip()  # Make sure the response is in lowercase and stripped of any leading/trailing spaces
 
-if proceed == 'yes':
-    update_response = requests.put(update_url, json=product, auth=auth)
-    update_response.raise_for_status()
-    print()
-else:
-    print("Operation cancelled by the user.")
+#proceed = input("Do you want to proceed with updating the product? (Yes/No): ")
+#proceed = proceed.lower().strip()  # Make sure the response is in lowercase and stripped of any leading/trailing spaces
 
+#if proceed == 'yes':
+#    update_response = requests.put(update_url, json=product, auth=auth)
+#    update_response.raise_for_status()
+#    print()
+#else:
+#    print("Operation cancelled by the user.")
