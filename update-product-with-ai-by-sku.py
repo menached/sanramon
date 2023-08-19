@@ -13,11 +13,18 @@ if not nltk.data.find('tokenizers/punkt'):
     nltk.download('punkt', quiet=True)
 
 location = sys.argv[1] + ".doap.com"
-# thelocation = location + ".doap.com"
+
+if location == "sanramon.doap.com":
+    city = "San Ramon"
+    phone = "925-365-6030"
+elif location == "danville.doap.com":
+    city = "Danville"
+    phone = "925-725-6920"
+else:
+    city = "Norcal East Bay"
+    phone = "833-289-3627"
 sku = sys.argv[2]
 
-# print(location)
-# print(sku)
 credentials = {}
 creds_file_path = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -36,29 +43,19 @@ with open(creds_file_path) as f:
 
 openai.api_key = credentials["openai.api_key"]
 auth = (
-    location + "_" + credentials["_consumer_key"],
-    location + "_" + credentials["_consumer_secret"]
-    # credentials["sanramon.doap.com_consumer_key"],
-    # credentials["sanramon.doap.com_consumer_secret"]
+    credentials[location + "_consumer_key"],
+    credentials[location + "_consumer_secret"]
 )
 
-# returning the URL of one image as
-# we are generating only one image
 def generate(new_pics_prompt):
     res = openai.Image.create(
-        # text describing the generated image
         prompt=new_pics_prompt,
-        # number of images to generate
         n=1,
-        # size of each generated image
-        # size="1024x1024",
         size="256x256",
     )
     return res["data"][0]["url"]
 
-
-
-base_url = "https://sanramon.doap.com/wp-json/wc/v3/products"
+base_url = "https://" + location + "/wp-json/wc/v3/products"
 
 response = requests.get(f'{base_url}', auth=auth, params={'sku': sku})
 response.raise_for_status()
@@ -71,7 +68,7 @@ product = response.json()[0]
 
 response = openai.ChatCompletion.create(
     # model="gpt-3.5-turbo",
-    model="gpt-4",
+    model="gpt-3.5-turbo",
     messages = [
     {
         "role": "system",
@@ -81,11 +78,10 @@ response = openai.ChatCompletion.create(
         "role": "user",
         "content": f"I have a product with SKU '{sku}' named '{product['name']}' with a short description of '{product['short_description']}' and a long description of '{product['description']}'. "
                    f"I need a new but similar name for this product that will both help with SEO and improve the product visibility in search engines. "
-                   f"Don't stray too far from the core idea of the original description. Use the word Doap as an acronym for awesome. "
-                   f"Limit the new product name to about 70 characters.  Do not use any punctuation or apostrophes or quotes. "
-                   f"Do use proper capitalization. Optimize all for SEO.   "
+                   f"Don't stray too far from the core idea of the original name.  Use the word Doap as an acronym for awesome. "
+                   f"Limit the new product name to about 70 characters.  Do not use any punctuation or apostrophes or double quotes. "
+                   f"Use proper capitalization. Optimize all for SEO.   "
                    f"Never spell the word dope, always substitute doap."
-                   f"If its greenhouse flower mention the farms of San Ramon sourced locally grown organic flower."
     },
 ]
 )
@@ -95,7 +91,7 @@ new_product_name = html.unescape(re.sub('<.*?>', '', new_product_name))
 
 response_short_description = openai.ChatCompletion.create(
     # model="gpt-3.5-turbo",
-    model="gpt-4",
+    model="gpt-3.5-turbo",
     messages = [
     {
         "role": "system",
@@ -108,9 +104,10 @@ response_short_description = openai.ChatCompletion.create(
                    f"Limit the new short description to about 160 characters."
                    f"Optimize for SEO and make sure it is not detectable by AI detectors. "
                    f"Doap is a synonym for awesome."
+                   f"Mention for delivery of that awesome product anywhere in or around '{city}' call '{phone}' between 9am and 9pm 7 days a week."
                    f"Make sure it is not detectable by AI detectors. "
-                   f"If its greenhouse flower mention the farms of San Ramon sourced locally grown organic flower."
-                   f"Don't mention price anywhere."
+                   f"If its greenhouse flower mention the locally sourced organic flower from the city of '{city}' and if not flower mention locally produced."
+                   f"Don't mention price."
     },
 ]
 )
@@ -119,7 +116,7 @@ new_short_description = response_short_description['choices'][0]['message']['con
 new_short_description = html.unescape(re.sub('<.*?>', '', new_short_description))
 
 response_long_description = openai.ChatCompletion.create(
-    model="gpt-4",
+    model="gpt-3.5-turbo",
     messages = [
     {
         "role": "system",
@@ -127,16 +124,18 @@ response_long_description = openai.ChatCompletion.create(
     },
     {
         "role": "user",
-        "content": f"I have a product with SKU '{sku}' named '{new_product_name}' with a long description ' {product['description']}'. "
+        "content": f"I have a product with SKU '{sku}' named '{new_product_name}' with a short_description of '{new_short_description}' long description ' {product['description']}'. "
                    f"I need a new but similar long description that will both help with SEO and improve the product visibility in search engines. "
                    f"The new description should be detailed and captivating to pique the interest of potential customers. "
                    f"Optimize for SEO and make sure it is not detectable by AI detectors."
-                   f"Mention landmarks in the San Ramon area "
+                   f"Mention we can meet up at certain landmarks in the '{city}' area. Mention call '{phone}' to get ultra fast 1hr delivery. "
                    f"and don't mention price anywhere. "
-                   f"Come up with and casually mention a few landmarks that are convenient for quickly meeting up that are well-known, well-traveled in the San Ramon area. "
+                   f"Come up with and casually mention a few landmarks that are convenient for quickly meeting up that are well-known, well-traveled in the '{city}' area. "
                    f"Casually mention we could meet you at one of these locations or deliver directly to your home or work. "
-                   f"If its greenhouse flower mention the farms of San Ramon sourced locally grown organic flower."
-                   f"Mention we accept cash, credit, crypto, applepay, zelle, paypal, venmo and others"
+                   f"Mention for delivery of that awesome product anywhere in or around '{city}' call '{phone}' between 9am and 9pm 7 days a week."
+                   f"Make sure it is not detectable by AI detectors. "
+                   f"If its greenhouse flower mention the locally sourced organic flower from the city of '{city}' and if not flower mention locally sourced."
+                   f"Mention we accept cash, credit, crypto, applepay, zelle, paypal, venmo and others."
                    f"Limit the new description to about 900 characters."
     },
 ]
@@ -165,18 +164,10 @@ for image in product['images']:
     del image['date_modified']
     del image['date_modified_gmt']
 
-#    old_image_url = image['src']
-#    image['src'] = new_image_url
-#    image['name'] = new_product_name
-
-#    print(f"Old Image URL: {old_image_url}")
-#    print(f"New Image URL: {new_image_url}\n")
-
-
-
 new_pic_prompts = ["Create a picture of a happy guy holding a bag of weed.", 
-                   "Generate an image of a cannabis bud up close.", 
-                   "Create an image of a very pretty girl delivering a tiny package to a handsome guy."]
+                   "Create a picture of a cannabis bud up close.", 
+                   "Create a picture of a cannabis plant up close.", 
+                   "Create a picture of a very pretty girl delivering a tiny package to a handsome guy."]
 new_image_urls = [generate(prompt) for prompt in new_pic_prompts]
 
 for i, image in enumerate(product['images']):
