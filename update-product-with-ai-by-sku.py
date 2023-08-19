@@ -9,12 +9,15 @@ import requests
 from PIL import Image
 import pprint
 
-
 if not nltk.data.find('tokenizers/punkt'):
     nltk.download('punkt', quiet=True)
 
-sku = sys.argv[1]
+location = sys.argv[1] + ".doap.com"
+# thelocation = location + ".doap.com"
+sku = sys.argv[2]
 
+# print(location)
+# print(sku)
 credentials = {}
 creds_file_path = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -27,14 +30,16 @@ with open(creds_file_path) as f:
         line = line.strip()
         if line.startswith("[") and line.endswith("]"):
             current_section = line[1:-1]
-        elif current_section == "sanramon.doap.com":
+        elif current_section == location:
             key, value = line.split(" = ")
             credentials[key] = value
 
 openai.api_key = credentials["openai.api_key"]
 auth = (
-    credentials["sanramon.doap.com_consumer_key"],
-    credentials["sanramon.doap.com_consumer_secret"]
+    location + "_" + credentials["_consumer_key"],
+    location + "_" + credentials["_consumer_secret"]
+    # credentials["sanramon.doap.com_consumer_key"],
+    # credentials["sanramon.doap.com_consumer_secret"]
 )
 
 # returning the URL of one image as
@@ -44,9 +49,10 @@ def generate(new_pics_prompt):
         # text describing the generated image
         prompt=new_pics_prompt,
         # number of images to generate
-        n=2,
+        n=1,
         # size of each generated image
-        size="1024x1024",
+        # size="1024x1024",
+        size="256x256",
     )
     return res["data"][0]["url"]
 
@@ -64,7 +70,8 @@ if not response.json():
 product = response.json()[0]
 
 response = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo",
+    # model="gpt-3.5-turbo",
+    model="gpt-4",
     messages = [
     {
         "role": "system",
@@ -87,11 +94,12 @@ new_product_name = response['choices'][0]['message']['content'].strip()
 new_product_name = html.unescape(re.sub('<.*?>', '', new_product_name))
 
 response_short_description = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo",
+    # model="gpt-3.5-turbo",
+    model="gpt-4",
     messages = [
     {
         "role": "system",
-        "content": "You are a knowledgeable and creative budtender with a way with words. You are skilled in creating captivating descriptions for cannabis products.",
+        "content": "You are a knowledgeable and creative budtender with a way with words. You are skilled in creating captivating descriptions for cannabis products. You are a bit of a hippie. You speak fairly plainly and tend to not make the descriptions too foo foo.",
     },
     {
         "role": "user",
@@ -99,10 +107,8 @@ response_short_description = openai.ChatCompletion.create(
                    f"I need a new but similar short description that will both help with SEO and improve the product visibility in search engines."
                    f"Limit the new short description to about 160 characters."
                    f"Optimize for SEO and make sure it is not detectable by AI detectors. "
-                   f"Having a slightly hippie kind of vibe is cool. "
                    f"Doap is a synonym for awesome."
                    f"Make sure it is not detectable by AI detectors. "
-                   f"Having a hippie kind of vibe is cool. "
                    f"If its greenhouse flower mention the farms of San Ramon sourced locally grown organic flower."
                    f"Don't mention price anywhere."
     },
@@ -113,7 +119,7 @@ new_short_description = response_short_description['choices'][0]['message']['con
 new_short_description = html.unescape(re.sub('<.*?>', '', new_short_description))
 
 response_long_description = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4",
     messages = [
     {
         "role": "system",
@@ -127,7 +133,6 @@ response_long_description = openai.ChatCompletion.create(
                    f"Optimize for SEO and make sure it is not detectable by AI detectors."
                    f"Mention landmarks in the San Ramon area "
                    f"and don't mention price anywhere. "
-                   f"Having a slightly hippie kind of vibe is cool. "
                    f"Come up with and casually mention a few landmarks that are convenient for quickly meeting up that are well-known, well-traveled in the San Ramon area. "
                    f"Casually mention we could meet you at one of these locations or deliver directly to your home or work. "
                    f"If its greenhouse flower mention the farms of San Ramon sourced locally grown organic flower."
@@ -169,9 +174,9 @@ for image in product['images']:
 
 
 
-new_pic_prompts = ["Create a picture of cannabis growing in San Ramon California.  Add a small green cartoon happy face in the lower right corner.", 
-                   "Generate an image of a cannabis bud up close.  Add a small green cartoon happy face in the lower right corner.", 
-                   "Show a bag of about an ounce of dried cured cannabis flower.  Add a small green cartoon happy face in the lower right corner."]
+new_pic_prompts = ["Create a picture of a happy guy holding a bag of weed.", 
+                   "Generate an image of a cannabis bud up close.", 
+                   "Create an image of a very pretty girl delivering a tiny package to a handsome guy."]
 new_image_urls = [generate(prompt) for prompt in new_pic_prompts]
 
 for i, image in enumerate(product['images']):
