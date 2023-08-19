@@ -20,6 +20,9 @@ if location == "sanramon.doap.com":
 elif location == "danville.doap.com":
     city = "Danville"
     phone = "925-725-6920"
+elif location == "alamo.doap.com":
+    city = "Alamo"
+    phone = "925-553-4710"
 else:
     city = "Norcal East Bay"
     phone = "833-289-3627"
@@ -79,9 +82,9 @@ response = openai.ChatCompletion.create(
         "content": f"I have a product with SKU '{sku}' named '{product['name']}' with a short description of '{product['short_description']}' and a long description of '{product['description']}'. "
                    f"I need a new but similar name for this product that will both help with SEO and improve the product visibility in search engines. "
                    f"Don't stray too far from the core idea of the original name.  Use the word Doap as an acronym for awesome. "
-                   f"Limit the new product name to about 70 characters.  Do not use any punctuation or apostrophes or double quotes. "
-                   f"Use proper capitalization. Optimize all for SEO.   "
-                   f"Never spell the word dope, always substitute doap."
+                   f"Limit the new product name to about 70 characters.  Do not use any punctuation or apostrophes or single or double quotes. "
+                   f"Use proper capitalization. Optimize all for SEO.  Never use prices in the new titles."
+                   f"Never spell the word dope, always substitute doap. Dont use the phone number in the title."
     },
 ]
 )
