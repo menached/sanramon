@@ -148,9 +148,9 @@ product['short_description'] = new_short_description
 old_long_description = product['description']
 product['description'] = new_long_description
 
-new_pic_prompt = "Create a picture of cannabis growing in a field"
+#new_pic_prompt = "Create a picture of cannabis growing in a field"
 # Get the image URL from OpenAI
-new_image_url = generate(new_pic_prompt)
+#new_image_url = generate(new_pic_prompt)
 
 # Update the product images with the new image
 for image in product['images']:
@@ -160,13 +160,28 @@ for image in product['images']:
     del image['date_modified']
     del image['date_modified_gmt']
 
-    old_image_url = image['src']
-    image['src'] = new_image_url
-    image['name'] = new_product_name
+#    old_image_url = image['src']
+#    image['src'] = new_image_url
+#    image['name'] = new_product_name
 
-    print(f"Old Image URL: {old_image_url}")
-    print(f"New Image URL: {new_image_url}\n")
+#    print(f"Old Image URL: {old_image_url}")
+#    print(f"New Image URL: {new_image_url}\n")
 
+
+
+new_pic_prompts = ["Create a picture of cannabis growing in San Ramon California.  Add a small green cartoon happy face in the lower right corner.", 
+                   "Generate an image of a cannabis bud up close.  Add a small green cartoon happy face in the lower right corner.", 
+                   "Show a bag of about an ounce of dried cured cannabis flower.  Add a small green cartoon happy face in the lower right corner."]
+new_image_urls = [generate(prompt) for prompt in new_pic_prompts]
+
+for i, image in enumerate(product['images']):
+    if i < len(new_image_urls):
+        old_image_url = image['src']
+        image['src'] = new_image_urls[i]
+        print(f"Old Image URL: {old_image_url}")
+        print(f"New Image URL: {image['src']}\n")
+    else:
+        break
 
 
 print(
